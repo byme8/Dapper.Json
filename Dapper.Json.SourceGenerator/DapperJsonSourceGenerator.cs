@@ -54,7 +54,7 @@ namespace Dapper.Json
         [global::System.Runtime.CompilerServices.ModuleInitializer]
         public static void Init()
         {{
-{types.Select(o => $@"            SqlMapper.AddTypeHandler(new JsonTypeHandler<{o.ToGlobalName()}>());").Join()}
+{types.Select(o => $@"            SqlMapper.AddTypeHandler(new JsonTypeHandler<{o.ToGlobalName()}>());").JoinWithNewLine()}
         }}
     }}
 }}
