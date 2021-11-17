@@ -1,0 +1,31 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+
+	<PropertyGroup>
+		<TargetFramework>netstandard2.0</TargetFramework>
+		<IncludeBuildOutput>false</IncludeBuildOutput>
+		<SuppressDependenciesWhenPacking>true</SuppressDependenciesWhenPacking>
+		<GeneratePackageOnBuild>true</GeneratePackageOnBuild>
+		<PackageId>Apparatus.Dapper.Json</PackageId>
+	</PropertyGroup>
+
+	<PropertyGroup>
+		<TargetsForTfmSpecificContentInPackage>$(TargetsForTfmSpecificContentInPackage);_AddAnalyzersToOutput</TargetsForTfmSpecificContentInPackage>
+	</PropertyGroup>
+
+	<ItemGroup>
+	  <ProjectReference Include="..\Dapper.Json.Core\Dapper.Json.Core.csproj" />
+	  <ProjectReference Include="..\Dapper.Json.SourceGenerator\Dapper.Json.SourceGenerator.csproj" />
+	</ItemGroup>
+
+	<ItemGroup>
+		<None Update="tools\*.ps1" CopyToOutputDirectory="Always" Pack="true" PackagePath="" />
+	</ItemGroup>
+
+	<Target Name="_AddAnalyzersToOutput">
+		<ItemGroup>
+			<TfmSpecificPackageFile Include="$(OutputPath)\Dapper.Json.SourceGenerator.dll" PackagePath="analyzers/dotnet/cs" />
+			<TfmSpecificPackageFile Include="$(OutputPath)\Dapper.Json.Core.dll" PackagePath="lib/netstandard2.0" />
+		</ItemGroup>
+	</Target>
+
+</Project>
