@@ -67,4 +67,23 @@ public class MainTest
         _ = handlers.First(o => o == "String[]");
         _ = handlers.First(o => o == "Role");
     }
+    
+    [Fact]
+    public async Task TypeMappingForTuplesAreGenerated()
+    {
+        var newProject = await TestProject.Project.ReplacePartsOfDocumentAsync("Program.cs",
+            ("// place to replace 1", "(int Id, Json<int[]> Ids) args = default;"));
+        var assembly = await newProject.CompileToRealAssembly();
+
+        var method = assembly
+            .GetType("Program")!
+            .GetMethod("Main")!;
+
+        method.Invoke(null, null);
+
+        var handlers = Utils
+            .GetRegisteredJsonTypeHandlers();
+        
+        _ = handlers.First(o => o == "Int32[]");
+    }
 }
