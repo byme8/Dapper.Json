@@ -3,6 +3,7 @@
 	<PropertyGroup>
 		<TargetFramework>netstandard2.0</TargetFramework>
 		<PackageId>Apparatus.Dapper.Json.System</PackageId>
+		<Description>Enables the System.Json deserialization for Apparatus.Dapper.Json.</Description>
 	</PropertyGroup>
 
 	<ItemGroup>
@@ -11,7 +12,7 @@
 	</ItemGroup>
 
 	<ItemGroup>
-		<ProjectReference Include="..\Dapper.Json.Core\Dapper.Json.Core.csproj" />
+	  <ProjectReference Include="..\Dapper.Json\Dapper.Json.csproj" />
 	</ItemGroup>
 
 </Project>

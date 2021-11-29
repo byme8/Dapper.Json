@@ -6,6 +6,7 @@
 		<SuppressDependenciesWhenPacking>true</SuppressDependenciesWhenPacking>
 		<GeneratePackageOnBuild>true</GeneratePackageOnBuild>
 		<PackageId>Apparatus.Dapper.Json</PackageId>
+		<Description>Adds the Dapper support for json columns.</Description>
 	</PropertyGroup>
 
 	<PropertyGroup>
