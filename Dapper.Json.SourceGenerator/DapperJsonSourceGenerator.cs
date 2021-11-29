@@ -1,10 +1,7 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Diagnostics;
 using System.Linq;
 using DuckInterface;
 using Microsoft.CodeAnalysis;
-using Microsoft.CodeAnalysis.CSharp.Syntax;
 
 namespace Dapper.Json.SourceGenerator
 {
@@ -75,19 +72,6 @@ namespace Dapper.Json
 }}
 
 ");
-            }
-        }
-    }
-
-    public class DapperSourceGeneratorSyntaxReceiver : ISyntaxReceiver
-    {
-        public List<GenericNameSyntax> Types { get; } = new();
-
-        public void OnVisitSyntaxNode(SyntaxNode syntaxNode)
-        {
-            if (syntaxNode is PropertyDeclarationSyntax { Type: GenericNameSyntax { Identifier.ValueText: "Json", } type })
-            {
-                Types.Add(type);
             }
         }
     }
