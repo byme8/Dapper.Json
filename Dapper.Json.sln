@@ -3,23 +3,23 @@ Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio Version 17
 VisualStudioVersion = 17.0.31903.59
 MinimumVisualStudioVersion = 10.0.40219.1
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Dapper.Json", "Dapper.Json\Dapper.Json.csproj", "{D2E12DE0-466F-4977-BDBB-A9CE37E46C62}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Dapper.Json", "src\Dapper.Json\Dapper.Json.csproj", "{D2E12DE0-466F-4977-BDBB-A9CE37E46C62}"
 EndProject
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Dapper.Json.SourceGenerator", "Dapper.Json.SourceGenerator\Dapper.Json.SourceGenerator.csproj", "{61CFDBB6-7783-4554-8A5D-65E986F76A30}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Dapper.Json.SourceGenerator", "src\Dapper.Json.SourceGenerator\Dapper.Json.SourceGenerator.csproj", "{61CFDBB6-7783-4554-8A5D-65E986F76A30}"
 EndProject
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Dapper.Json.Core", "Dapper.Json.Core\Dapper.Json.Core.csproj", "{889E1F16-E68D-4B13-B0C1-60620B271D0D}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Dapper.Json.Core", "src\Dapper.Json.Core\Dapper.Json.Core.csproj", "{889E1F16-E68D-4B13-B0C1-60620B271D0D}"
 EndProject
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Dapper.Json.Tests", "Dapper.Json.Tests\Dapper.Json.Tests.csproj", "{59FA66E6-CBA7-4D0F-A3F7-0119B9008F4A}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Dapper.Json.Tests", "src\Dapper.Json.Tests\Dapper.Json.Tests.csproj", "{59FA66E6-CBA7-4D0F-A3F7-0119B9008F4A}"
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Package", "Package", "{6BBB0AD6-0576-4250-8142-3661D4E9E5B0}"
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Tests", "Tests", "{9E63BCB3-AB50-4096-9CD2-11B8D4C9CC12}"
 EndProject
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Dapper.Json.TestProject", "Dapper.Json.TestProject\Dapper.Json.TestProject.csproj", "{3ABD4F95-EFBF-4B84-A7E9-AD02048C943D}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Dapper.Json.TestProject", "src\Dapper.Json.TestProject\Dapper.Json.TestProject.csproj", "{3ABD4F95-EFBF-4B84-A7E9-AD02048C943D}"
 EndProject
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Dapper.Json.System", "Dapper.Json.System\Dapper.Json.System.csproj", "{EFC55F61-E2FE-459B-9B5C-2FF8EB0405B6}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Dapper.Json.System", "src\Dapper.Json.System\Dapper.Json.System.csproj", "{EFC55F61-E2FE-459B-9B5C-2FF8EB0405B6}"
 EndProject
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Dapper.Json.Newtonsoft", "Dapper.Json.Newtonsoft\Dapper.Json.Newtonsoft.csproj", "{7900DDE8-8A09-481D-BAB8-B86B54BCCF74}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Dapper.Json.Newtonsoft", "src\Dapper.Json.Newtonsoft\Dapper.Json.Newtonsoft.csproj", "{7900DDE8-8A09-481D-BAB8-B86B54BCCF74}"
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "SolutionFolder", "SolutionFolder", "{27B1E9A7-CF09-4159-9AEB-4C0F3DF2FCA2}"
 	ProjectSection(SolutionItems) = preProject

@@ -1,6 +1,6 @@
 <Project>
     <PropertyGroup>
-		<Version>0.1.1.0</Version>
+		<Version>0.1.2.0</Version>
 		<Authors>byme</Authors>
 		<PackageProjectUrl>https://github.com/byme8/Dapper.Json</PackageProjectUrl>
 		<RepositoryUrl>https://github.com/byme8/Dapper.Json</RepositoryUrl>
