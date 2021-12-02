@@ -1,88 +1,108 @@
-# Dapper.Json adds support for JSON columns in Dapper
+# Dapper.Json adds support for JSON columns inside the Dapper
 
-This is small library that simplifies JSON columns handeling inside the Dapper. 
+It is a small library that simplifies JSON column handling inside the Dapper. 
 
 You can use it like that:
 
 ``` cs
 
-var users = connection.Query
+public class UserData
+{
+    public int Id { get; set; }
+    public string Login { get; set; }
+    public Json<EmailData[]> Emails { get; set; }
+}
+
+public class EmailData
+{
+    public string Email { get; set; }
+    public EmailKind Kind { get; set; }
+}
+
+var users = await connection.QueryAsync<UserData>(@$"
+    select Id,
+           Login,
+           (select Text as Email, Kind from Emails e where e.UserId = u.Id FOR JSON PATH) as Emails
+    from Users u");
+    
+foreach (var user in users)
+{
+    Console.WriteLine($"Id: {user.Id}");
+    Console.WriteLine($"Login: {user.Login}");
+    foreach (var email in user.Emails.Value)
+    {
+        Console.WriteLine($"Email: {email.Email}");
+        Console.WriteLine($"Kind: {email.Kind}");
+    }
+}
 
 ```
-
 
 # Installation
 
-``` dot ```
+You will need to install two packages to make it work. 
+First one:
 
-What I mean under that? Let's have a look at following sample.
+``` dotnet add package Apparatus.Dapper.Json ```
 
-Let's suppose we have the next sql schema:
-``` cs
-User
+It contains core classes and a source generator(about it later).
+
+For the second one, there are two choices right now.
+
+``` dotnet add package Apparatus.Dapper.Json.Newtonsoft ``` or ``` dotnet add package Apparatus.Dapper.Json.System ```
+
+As you may guess, the first one will use Newtonsoft.Json for deserialization and the second one the System.Text.Json.
+
+Done! You are ready to go.
+
+
+# How it works
+
+By itself, the implementation is straightforward. We have a source generator that looks for `` Json<T> `` and generates a module initializer like that:
+
+``` cs 
+using System;
+
+namespace Dapper.Json
 {
-    int Id
-    string FirstName
-    string LastName
-}
-
-Email
-{
-    int Id
-    int UserId
-    string Text
-    string Kind
-}
-
-Role
-{
-    int Id
-    string Name
-}
-
-UserRole
-{
-    int UserId
-    int RoleId
+    public static class DapperJsonModuleInitializer
+    {
+        [global::System.Runtime.CompilerServices.ModuleInitializer]
+        public static void Init()
+        {
+            SqlMapper.AddTypeHandler(new JsonTypeHandler<global::EmailData[]>());
+        }
+    }
 }
 ```
+The `` JsonTypeHandler<T> `` can be insatlled via `` Apparatus.Dapper.Json.* `` packages, or you can write your own.
+Here is the sample for the `` Newtonsoft.Json ``:
 
-and we need to map it to model like that:
-``` cs
-public class User
+``` cs 
+using System.Data;
+using Newtonsoft.Json;
+
+namespace Dapper.Json
 {
-  public string FirstName { get; set; }
-  public string LastName { get; set; }
-  public Role[] Roles { get; set; }
-  public Email[] Emails { get; set; }
-  
+    public class JsonTypeHandler<T> : SqlMapper.TypeHandler<Json<T>>
+    {
+        public override void SetValue(IDbDataParameter parameter, Json<T> value)
+        {
+            parameter.Value = JsonConvert.SerializeObject(value.Value, JsonSettings.Settings);
+        }
+
+        public override Json<T> Parse(object value)
+        {
+            if (value is string json)
+            {
+                return new Json<T>(JsonConvert.DeserializeObject<T>(json, JsonSettings.Settings));
+            }
+
+            return new Json<T>(default);
+        }
+    }
 }
-
-public record Role(string Name, DateTimeOffset CreateDate);
-
-public record Email(string Text, string Kind);
 ```
-
-If we try to fetch all data in SQL way, we will need atleast 3 separate sql queries.
-
-The first one will bright FirstName and LastName:
-``` sql
-select FirstName, LastName from Users where Id = @UserId
-```
-
-The second one will get a list of roles:
-``` sql
-select Name from Roles r
-inner join UserRoles u on u.Role = r.Id
-where u.UserId = @UserId
-```
-
-The third one will get a list of emails:
-``` sql
-select Text, Kind from Emails where UserId = @UserId
-```
-
-
 
 
 
