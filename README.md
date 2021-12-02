@@ -1,6 +1,20 @@
 # Dapper.Json adds support for JSON columns in Dapper
 
-This is small library that simplifies JSON columns handeling inside the Dapper.
+This is small library that simplifies JSON columns handeling inside the Dapper. 
+
+You can use it like that:
+
+``` cs
+
+var users = connection.Query
+
+```
+
+
+# Installation
+
+``` dot ```
+
 What I mean under that? Let's have a look at following sample.
 
 Let's suppose we have the next sql schema:
