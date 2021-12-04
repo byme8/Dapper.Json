@@ -1,4 +1,4 @@
-# Dapper.Json adds support for JSON columns inside the Dapper
+# JSON columns for the Dapper
 
 It is a small library that simplifies JSON column handling inside the Dapper. 
 
