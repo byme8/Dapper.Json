@@ -1,5 +1,7 @@
 # JSON columns for the Dapper
 
+[The full article](https://dev.to/byme8/making-dapper-and-json-friends-5afc)
+
 It is a small library that simplifies JSON column handling inside the Dapper. 
 
 You can use it like that:
