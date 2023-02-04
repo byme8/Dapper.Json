@@ -66,6 +66,19 @@ public class MainTest : IAsyncLifetime
 
         await Verify(handlers);
     }
+    
+    [Fact]
+    public async Task TypeMappingWithAsJsonExtensionIsDetected()
+    {
+        var newProject = await TestProject.Project.ReplacePartsOfDocumentAsync(
+            "Program.cs",
+            ("// place to replace 0", "public class Role { public string Name { get; set;} }"),
+            ("// place to replace 1", "var role = new Role().AsJson();"));
+
+        var handlers = await Execute(newProject);
+
+        await Verify(handlers);
+    }
 
     private static async Task<string[]> Execute(Project project)
     {

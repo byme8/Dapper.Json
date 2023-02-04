@@ -16,18 +16,34 @@ public class DapperJsonSourceGenerator : IIncrementalGenerator
             .Select((o, t) => o.GetTypeByMetadataName("Dapper.Json.Json`1"));
 
         var jsons = context.SyntaxProvider
-            .CreateSyntaxProvider(
-                SelectJsonT,
-                (o, token) => o.SemanticModel.GetTypeInfo(o.Node, token));
-        
+            .CreateSyntaxProvider(SelectJsonT, Transform);
+
         var combined = jsons.Combine(jsonType);
         context.RegisterImplementationSourceOutput(combined, Generate);
     }
 
-    private void Generate(SourceProductionContext context, (TypeInfo Target, INamedTypeSymbol JsonType) input)
+    private ITypeSymbol Transform(GeneratorSyntaxContext context, CancellationToken cancellationToken)
+    {
+        switch (context.Node)
+        {
+            case GenericNameSyntax:
+                return context.SemanticModel.GetTypeInfo(context.Node, cancellationToken).Type;
+            case MemberAccessExpressionSyntax memberAccess:
+                var symbolInfo = context.SemanticModel.GetSymbolInfo(memberAccess.Name, cancellationToken);
+                if (symbolInfo.Symbol is IMethodSymbol methodSymbol)
+                {
+                    return methodSymbol.ReturnType;
+                }
+                return null;
+            default:
+                return null;
+        }
+    }
+
+    private void Generate(SourceProductionContext context, (ITypeSymbol Target, INamedTypeSymbol JsonType) input)
     {
         var (target, jsonType) = input;
-        if (target.Type is not INamedTypeSymbol namedTypeSymbol ||
+        if (target is not INamedTypeSymbol namedTypeSymbol ||
             !SymbolEqualityComparer.Default.Equals(namedTypeSymbol.ConstructedFrom, jsonType))
         {
             return;
@@ -60,6 +76,15 @@ namespace Dapper.Json
     private bool SelectJsonT(SyntaxNode syntaxNode, CancellationToken token)
     {
         if (syntaxNode is GenericNameSyntax { Identifier.ValueText: "Json", } type)
+        {
+            return true;
+        }
+
+        if (syntaxNode is MemberAccessExpressionSyntax
+            {
+                Parent: InvocationExpressionSyntax,
+                Name.Identifier.ValueText: "AsJson"
+            })
         {
             return true;
         }
