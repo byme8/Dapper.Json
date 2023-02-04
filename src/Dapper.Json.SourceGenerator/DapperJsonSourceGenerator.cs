@@ -12,14 +12,16 @@ public class DapperJsonSourceGenerator : IIncrementalGenerator
 {
     public void Initialize(IncrementalGeneratorInitializationContext context)
     {
+        var jsonType = context.CompilationProvider
+            .Select((o, t) => o.GetTypeByMetadataName("Dapper.Json.Json`1"));
+
         var jsons = context.SyntaxProvider
             .CreateSyntaxProvider(
                 SelectJsonT,
-                (o, token) => (
-                    Target: o.SemanticModel.GetTypeInfo(o.Node, token),
-                    JsonType: o.SemanticModel.Compilation.GetTypeByMetadataName("Dapper.Json.Json`1")));
-
-        context.RegisterImplementationSourceOutput(jsons, Generate);
+                (o, token) => o.SemanticModel.GetTypeInfo(o.Node, token));
+        
+        var combined = jsons.Combine(jsonType);
+        context.RegisterImplementationSourceOutput(combined, Generate);
     }
 
     private void Generate(SourceProductionContext context, (TypeInfo Target, INamedTypeSymbol JsonType) input)
