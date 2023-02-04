@@ -1,11 +1,10 @@
-﻿using System.Linq;
-using System.Threading.Tasks;
-using Dapper.Json.Tests.Data;
-using Xunit;
+﻿using Dapper.Json.Tests.Data;
+using Microsoft.CodeAnalysis;
 
 namespace Dapper.Json.Tests;
 
-public class MainTest
+[UsesVerify]
+public class MainTest : IAsyncLifetime
 {
     [Fact]
     public async Task CompiledWithoutErrors()
@@ -16,16 +15,9 @@ public class MainTest
     [Fact]
     public async Task TypeMappingForArrayOfStringIsGenerated()
     {
-        var assembly = await TestProject.Project.CompileToRealAssembly();
-        var method = assembly
-            .GetType("Program")!
-            .GetMethod("Main")!;
+        var handlers = await Execute(TestProject.Project);
 
-        method.Invoke(null, null);
-
-        _ = Utils
-            .GetRegisteredJsonTypeHandlers()
-            .First(o => o == "String[]");
+        await Verify(handlers);
     }
 
     [Fact]
@@ -34,46 +26,50 @@ public class MainTest
         var newProject = await TestProject.Project.ReplacePartsOfDocumentAsync("Program.cs",
             ("// place to replace 0", "public class Role { public string Name { get; set;} }"),
             ("public Json<string[]> Emails { get; set; }", "public Json<Role> Role { get; set; }"));
-        var assembly = await newProject.CompileToRealAssembly();
 
-        var method = assembly
-            .GetType("Program")!
-            .GetMethod("Main")!;
+        var handlers = await Execute(newProject);
 
-        method.Invoke(null, null);
-
-        _ = Utils
-            .GetRegisteredJsonTypeHandlers()
-            .First(o => o == "Role");
+        await Verify(handlers);
     }
-    
+
     [Fact]
     public async Task TypeMappingForManyTypesAreGenerated()
     {
         var newProject = await TestProject.Project.ReplacePartsOfDocumentAsync("Program.cs",
             ("// place to replace 0", "public class Role { public string Name { get; set;} }"),
             ("// place for property", "public Json<Role> Role { get; set; }"));
-        var assembly = await newProject.CompileToRealAssembly();
 
-        var method = assembly
-            .GetType("Program")!
-            .GetMethod("Main")!;
+        var handlers = await Execute(newProject);
 
-        method.Invoke(null, null);
-
-        var handlers = Utils
-            .GetRegisteredJsonTypeHandlers();
-        
-        _ = handlers.First(o => o == "String[]");
-        _ = handlers.First(o => o == "Role");
+        await Verify(handlers);
     }
-    
+
     [Fact]
     public async Task TypeMappingForTuplesAreGenerated()
     {
         var newProject = await TestProject.Project.ReplacePartsOfDocumentAsync("Program.cs",
             ("// place to replace 1", "(int Id, Json<int[]> Ids) args = default;"));
-        var assembly = await newProject.CompileToRealAssembly();
+
+        var handlers = await Execute(newProject);
+
+        await Verify(handlers);
+    }
+
+    [Fact]
+    public async Task TypeMappingForGenericsAreIgnored()
+    {
+        var newProject = await TestProject.Project.ReplacePartsOfDocumentAsync(
+            "Program.cs",
+            ("// place to replace 0", "public class Entity<T> { public Json<T> Value { get; set;} }"));
+
+        var handlers = await Execute(newProject);
+
+        await Verify(handlers);
+    }
+
+    private static async Task<string[]> Execute(Project project)
+    {
+        var assembly = await project.CompileToRealAssembly();
 
         var method = assembly
             .GetType("Program")!
@@ -81,9 +77,18 @@ public class MainTest
 
         method.Invoke(null, null);
 
-        var handlers = Utils
-            .GetRegisteredJsonTypeHandlers();
-        
-        _ = handlers.First(o => o == "Int32[]");
+        var handlers = Utils.GetRegisteredJsonTypeHandlers();
+        return handlers;
+    }
+
+    public Task InitializeAsync()
+    {
+        SqlMapper.ResetTypeHandlers();
+        return Task.CompletedTask;
+    }
+
+    public Task DisposeAsync()
+    {
+        return Task.CompletedTask;
     }
 }

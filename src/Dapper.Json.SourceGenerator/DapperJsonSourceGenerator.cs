@@ -1,78 +1,67 @@
 ﻿using System;
 using System.Linq;
+using System.Threading;
 using DuckInterface;
 using Microsoft.CodeAnalysis;
+using Microsoft.CodeAnalysis.CSharp.Syntax;
 
-namespace Dapper.Json.SourceGenerator
+namespace Dapper.Json.SourceGenerator;
+
+[Generator]
+public class DapperJsonSourceGenerator : IIncrementalGenerator
 {
-    [Generator]
-    public class DapperJsonSourceGenerator : ISourceGenerator
+    public void Initialize(IncrementalGeneratorInitializationContext context)
     {
-        public void Initialize(GeneratorInitializationContext context)
+        var jsons = context.SyntaxProvider
+            .CreateSyntaxProvider(
+                SelectJsonT,
+                (o, token) => (
+                    Target: o.SemanticModel.GetTypeInfo(o.Node, token),
+                    JsonType: o.SemanticModel.Compilation.GetTypeByMetadataName("Dapper.Json.Json`1")));
+
+        context.RegisterImplementationSourceOutput(jsons, Generate);
+    }
+
+    private void Generate(SourceProductionContext context, (TypeInfo Target, INamedTypeSymbol JsonType) input)
+    {
+        var (target, jsonType) = input;
+        if (target.Type is not INamedTypeSymbol namedTypeSymbol ||
+            !SymbolEqualityComparer.Default.Equals(namedTypeSymbol.ConstructedFrom, jsonType))
         {
-            context.RegisterForSyntaxNotifications(() => new DapperSourceGeneratorSyntaxReceiver());
+            return;
         }
 
-        public void Execute(GeneratorExecutionContext context)
+        var type = namedTypeSymbol.TypeArguments.First();
+        if (type is ITypeParameterSymbol)
         {
-            if (context.SyntaxReceiver is not DapperSourceGeneratorSyntaxReceiver syntaxReceiver)
-            {
-                return;
-            }
+            return;
+        }
 
-            try
-            {
-
-                var jsonType = context.Compilation.GetTypeByMetadataName("Dapper.Json.Json`1");
-
-                var types = syntaxReceiver.Types
-                    .Select(o =>
-                    {
-                        var semanticModel = context.Compilation.GetSemanticModel(o.SyntaxTree);
-                        var type = semanticModel.GetTypeInfo(o);
-                        if (type.Type is INamedTypeSymbol namedTypeSymbol &&
-                            namedTypeSymbol.ConstructedFrom.Equals(jsonType))
-                        {
-                            return namedTypeSymbol.TypeArguments.First();
-                        }
-
-                        return null;
-                    })
-                    .Where(o => o != null)
-                    .Distinct(SymbolEqualityComparer.Default)
-                    .ToArray();
-
-                var source = @$"using System;
+        var safeTypeName = type.ToSafeGlobalName();
+        var source = @$"using System;
 
 namespace Dapper.Json
 {{
-    public static class DapperJsonModuleInitializer
+    public static class DapperJson{safeTypeName}ModuleInitializer
     {{
         [global::System.Runtime.CompilerServices.ModuleInitializer]
         public static void Init()
         {{
-{types.Select(o => $@"            SqlMapper.AddTypeHandler(new JsonTypeHandler<{o.ToGlobalName()}>());").JoinWithNewLine()}
+            SqlMapper.AddTypeHandler(new JsonTypeHandler<{type.ToGlobalName()}>());
         }}
     }}
 }}
 ";
+        context.AddSource($"Dapper.Json.{safeTypeName}.g.cs", source.ToSourceText());
+    }
 
-                context.AddSource("Dapper.Json.g.cs", source.ToSourceText());
-            }
-            catch (Exception e)
-            {
-                context.AddSource("Dapper.Json.Error.g.cs", @$"
-
-namespace Dapper.Json
-{{
-    public static class DapperJsonError
-    {{
-        public static string Error = ""{e.Message}"";
-    }}
-}}
-
-");
-            }
+    private bool SelectJsonT(SyntaxNode syntaxNode, CancellationToken token)
+    {
+        if (syntaxNode is GenericNameSyntax { Identifier.ValueText: "Json", } type)
+        {
+            return true;
         }
+
+        return false;
     }
 }

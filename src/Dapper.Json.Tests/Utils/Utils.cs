@@ -14,12 +14,12 @@ namespace Dapper.Json.Tests
         public static string[] GetRegisteredJsonTypeHandlers()
         {
             var field = typeof(SqlMapper)
-                .GetField("typeHandlers", BindingFlags.Static | BindingFlags.NonPublic);
+                .GetField("typeHandlers", BindingFlags.Static | BindingFlags.NonPublic)!;
             
             var handlers = field.GetValue(null) as Dictionary<Type, SqlMapper.ITypeHandler>;
 
-            return handlers
-                .Where(o => o.Key.FullName.StartsWith("Dapper.Json.Json"))
+            return handlers!
+                .Where(o => o.Key.FullName!.StartsWith("Dapper.Json.Json"))
                 .Select(o => o.Key.GenericTypeArguments.First().Name)
                 .ToArray();
         }

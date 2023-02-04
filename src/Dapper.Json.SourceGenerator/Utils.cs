@@ -152,9 +152,10 @@ namespace DuckInterface
         {
             return symbol.ToDisplayString(SymbolDisplayFormat.FullyQualifiedFormat)
                 .Replace("global::", "")
-                .Replace("<", "Of_")
-                .Replace(">", "_End")
-                .Replace(".", "_");
+                .Replace("[]", "Array")
+                .Replace("<", "Of")
+                .Replace(">", "")
+                .Replace(".", "");
         }
 
         public static string Join(this IEnumerable<string> values, string separator = ", ")
