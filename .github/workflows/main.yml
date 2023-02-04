@@ -22,4 +22,6 @@ jobs:
       run: dotnet test --no-build --verbosity normal
     - name: Push
       run: |
-        pwsh ./push.ps1 ${{ secrets.NUGET_KEY }} 
+        pwsh ./pack.ps1 -version ${GITHUB_REF_NAME:1}
+        cd ./nugets
+        dotnet nuget push *.nupkg --skip-duplicate -s https://nuget.org -k ${{ secrets.NUGET_KEY }} 

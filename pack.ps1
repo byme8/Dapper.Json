@@ -1,13 +1,8 @@
-cd src/Dapper.Json
-dotnet build -c Release
-dotnet pack -c Release -o ../../nugets
+param (
+    [string]$version = (Get-Date -Format "999.yyMM.ddHH.mmss")
+) 
 
-cd ../Dapper.Json.System
-dotnet build -c Release
-dotnet pack -c Release -o ../../nugets
-
-cd ../Dapper.Json.Newtonsoft
-dotnet build -c Release
-dotnet pack -c Release -o ../../nugets
-
-cd ../..
+dotnet clean
+dotnet pack -c Release ./src/Dapper.Json/Dapper.Json.csproj --verbosity normal /p:Version=$version -o ./nugets
+dotnet pack -c Release ./src/Dapper.Json.System/Dapper.Json.System.csproj --verbosity normal /p:Version=$version -o ./nugets
+dotnet pack -c Release ./src/Dapper.Json.Newtonsoft/Dapper.Json.Newtonsoft.csproj --verbosity normal /p:Version=$version -o ./nugets
