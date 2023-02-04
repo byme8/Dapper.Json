@@ -1,4 +1,4 @@
-﻿using System;
+﻿using System.Collections.Immutable;
 using System.Linq;
 using System.Threading;
 using DuckInterface;
@@ -18,8 +18,48 @@ public class DapperJsonSourceGenerator : IIncrementalGenerator
         var jsons = context.SyntaxProvider
             .CreateSyntaxProvider(SelectJsonT, Transform);
 
-        var combined = jsons.Combine(jsonType);
+        var combined = jsons.Collect()
+            .Combine(jsonType);
+
         context.RegisterImplementationSourceOutput(combined, Generate);
+    }
+
+    private void Generate(SourceProductionContext context,
+        (ImmutableArray<ITypeSymbol> Targets, INamedTypeSymbol JsonType) input)
+    {
+        var (targets, jsonType) = input;
+        var uniqueTargets = targets.Distinct(SymbolEqualityComparer.Default);
+        foreach (var target in uniqueTargets)
+        {
+            if (target is not INamedTypeSymbol namedTypeSymbol ||
+                !SymbolEqualityComparer.Default.Equals(namedTypeSymbol.ConstructedFrom, jsonType))
+            {
+                return;
+            }
+
+            var type = namedTypeSymbol.TypeArguments.First();
+            if (type is ITypeParameterSymbol)
+            {
+                return;
+            }
+
+            var safeTypeName = type.ToSafeGlobalName();
+            var source = @$"using System;
+
+namespace Dapper.Json
+{{
+    public static class DapperJson{safeTypeName}ModuleInitializer
+    {{
+        [global::System.Runtime.CompilerServices.ModuleInitializer]
+        public static void Init()
+        {{
+            SqlMapper.AddTypeHandler(new JsonTypeHandler<{type.ToGlobalName()}>());
+        }}
+    }}
+}}
+";
+            context.AddSource($"Dapper.Json.{safeTypeName}.g.cs", source.ToSourceText());
+        }
     }
 
     private ITypeSymbol Transform(GeneratorSyntaxContext context, CancellationToken cancellationToken)
@@ -34,43 +74,11 @@ public class DapperJsonSourceGenerator : IIncrementalGenerator
                 {
                     return methodSymbol.ReturnType;
                 }
+
                 return null;
             default:
                 return null;
         }
-    }
-
-    private void Generate(SourceProductionContext context, (ITypeSymbol Target, INamedTypeSymbol JsonType) input)
-    {
-        var (target, jsonType) = input;
-        if (target is not INamedTypeSymbol namedTypeSymbol ||
-            !SymbolEqualityComparer.Default.Equals(namedTypeSymbol.ConstructedFrom, jsonType))
-        {
-            return;
-        }
-
-        var type = namedTypeSymbol.TypeArguments.First();
-        if (type is ITypeParameterSymbol)
-        {
-            return;
-        }
-
-        var safeTypeName = type.ToSafeGlobalName();
-        var source = @$"using System;
-
-namespace Dapper.Json
-{{
-    public static class DapperJson{safeTypeName}ModuleInitializer
-    {{
-        [global::System.Runtime.CompilerServices.ModuleInitializer]
-        public static void Init()
-        {{
-            SqlMapper.AddTypeHandler(new JsonTypeHandler<{type.ToGlobalName()}>());
-        }}
-    }}
-}}
-";
-        context.AddSource($"Dapper.Json.{safeTypeName}.g.cs", source.ToSourceText());
     }
 
     private bool SelectJsonT(SyntaxNode syntaxNode, CancellationToken token)
