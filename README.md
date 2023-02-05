@@ -4,10 +4,8 @@
 
 It is a small library that simplifies JSON column handling inside the Dapper. 
 
-You can use it like that:
-
+Read a list of items:
 ``` cs
-
 public class UserData
 {
     public int Id { get; set; }
@@ -21,23 +19,52 @@ public class EmailData
     public EmailKind Kind { get; set; }
 }
 
-var users = await connection.QueryAsync<UserData>(@$"
-    select Id,
-           Login,
-           (select Text as Email, Kind from Emails e where e.UserId = u.Id FOR JSON PATH) as Emails
-    from Users u");
+var users = await connection.QueryAsync<UserData>("""
+        select Id,
+               Login,
+               (select Text as Email, Kind from Emails e where e.UserId = u.Id FOR JSON PATH) as Emails
+        from Users u
+    """);
     
-foreach (var user in users)
+```
+
+Read a single item:
+``` csharp
+public class Book
 {
-    Console.WriteLine($"Id: {user.Id}");
-    Console.WriteLine($"Login: {user.Login}");
-    foreach (var email in user.Emails.Value)
-    {
-        Console.WriteLine($"Email: {email.Email}");
-        Console.WriteLine($"Kind: {email.Kind}");
-    }
+    public string ISBN { get; set; }
+    public Json<Person> Author { get; set; }
 }
 
+public class Person
+{
+    public string FirstName { get; set; }
+    public string LastName { get; set; }
+}
+
+var books = await connection.QueryAsync<Book>("""
+        SELECT 
+            ISBN,
+            (SELECT FirstName, LastName FROM Authors a where a.Id = b.AuthorEntityId  FOR JSON PATH, WITHOUT_ARRAY_WRAPPER) AS Author
+        FROM Books b
+    """);  
+```
+
+Write json to column:
+``` csharp
+var settings = new UserSettings
+{
+    Update = DateTimeOffset.Now,
+    HideSearchBar = true
+};
+
+var rows = await connection.ExecuteAsync(
+    """
+        UPDATE Users SET 
+            SettingsJson = @Settings
+        WHERE Id = @Id
+       """,
+    new { Id = id, Settings = settings.AsJson() });
 ```
 
 # Installation
