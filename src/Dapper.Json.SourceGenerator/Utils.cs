@@ -155,6 +155,8 @@ namespace DuckInterface
                 .Replace("[]", "Array")
                 .Replace("<", "Of")
                 .Replace(">", "")
+                .Replace(",", "And")
+                .Replace(" ", "")
                 .Replace(".", "");
         }
 
