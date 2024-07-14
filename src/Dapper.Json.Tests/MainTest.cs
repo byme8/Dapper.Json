@@ -54,6 +54,17 @@ public class MainTest : IAsyncLifetime
 
         await Verify(handlers);
     }
+    
+    [Fact]
+    public async Task TypeMappingForDictionariesAreGenerated()
+    {
+        var newProject = await TestProject.Project.ReplacePartsOfDocumentAsync("Program.cs",
+            ("public Json<string[]> Emails { get; set; }", "public Json<System.Collections.Generic.Dictionary<string,string>> Dict { get; set; }"));
+
+        var handlers = await Execute(newProject);
+
+        await Verify(handlers);
+    }
 
     [Fact]
     public async Task TypeMappingForGenericsAreIgnored()
