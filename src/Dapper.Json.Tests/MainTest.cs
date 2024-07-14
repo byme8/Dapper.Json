@@ -1,9 +1,9 @@
 ﻿using Dapper.Json.Tests.Data;
+using Dapper.Json.Tests.Utils;
 using Microsoft.CodeAnalysis;
 
 namespace Dapper.Json.Tests;
 
-[UsesVerify]
 public class MainTest : IAsyncLifetime
 {
     [Fact]
@@ -115,7 +115,7 @@ public class MainTest : IAsyncLifetime
 
         method.Invoke(null, null);
 
-        var handlers = Utils.GetRegisteredJsonTypeHandlers();
+        var handlers = Utils.Utils.GetRegisteredJsonTypeHandlers();
         return handlers;
     }
 

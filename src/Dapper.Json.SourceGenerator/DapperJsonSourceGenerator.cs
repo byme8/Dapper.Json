@@ -1,7 +1,6 @@
 ﻿using System.Collections.Immutable;
 using System.Linq;
 using System.Threading;
-using DuckInterface;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
 
@@ -13,7 +12,7 @@ public class DapperJsonSourceGenerator : IIncrementalGenerator
     public void Initialize(IncrementalGeneratorInitializationContext context)
     {
         var jsonType = context.CompilationProvider
-            .Select((o, t) => o.GetTypeByMetadataName("Dapper.Json.Json`1"));
+            .Select((o, _) => o.GetTypeByMetadataName("Dapper.Json.Json`1"));
 
         var jsons = context.SyntaxProvider
             .CreateSyntaxProvider(SelectJsonT, Transform);
@@ -83,7 +82,7 @@ namespace Dapper.Json
 
     private bool SelectJsonT(SyntaxNode syntaxNode, CancellationToken token)
     {
-        if (syntaxNode is GenericNameSyntax { Identifier.ValueText: "Json", } type)
+        if (syntaxNode is GenericNameSyntax { Identifier.ValueText: "Json", } _)
         {
             return true;
         }

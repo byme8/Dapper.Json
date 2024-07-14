@@ -4,11 +4,12 @@
 		<TargetFramework>netstandard2.0</TargetFramework>
 		<PackageId>Apparatus.Dapper.Json.System</PackageId>
 		<Description>Enables the System.Json deserialization for Apparatus.Dapper.Json.</Description>
+		<RootNamespace>Dapper.Json</RootNamespace>
 	</PropertyGroup>
 
 	<ItemGroup>
 		<PackageReference Include="Dapper" Version="2.0.123" />
-		<PackageReference Include="System.Text.Json" Version="6.0.0" />
+		<PackageReference Include="System.Text.Json" Version="8.0.4" />
 	</ItemGroup>
 
 	<ItemGroup>
